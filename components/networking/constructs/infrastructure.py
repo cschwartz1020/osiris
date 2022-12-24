@@ -32,4 +32,5 @@ class VPC(Construct):
                                    subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
                                )
                            ],
+                           vpc_name=env_name
                            )
