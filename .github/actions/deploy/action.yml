@@ -1,0 +1,59 @@
+name: 'Setup'
+description: 'configures AWS credentials and sets up environment for CDK'
+inputs:
+  region:  
+    description: 'Region to deploy to'
+    required: true
+  environment:
+    description: 'Environment to deploy to'
+    required: true
+  aws-access-key:
+    description: 'AWS access key'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS secret access key'
+    required: true
+
+runs:
+
+  using: "composite"
+  steps:
+
+    - name: Setup environment for CDK
+      uses: ./.github/actions/setup
+      with:
+        region: ${{ inputs.region }}
+        environment: ${{ inputs.environment }}
+        aws-access-key: ${{ inputs.aws-access-key }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+
+    - name: Check diff
+      shell: bash
+      id: diff
+      run: |
+        res=$(cdk diff -c env=${{ inputs.environment }} 2>&1)
+
+        if [[ "$res" == *"Resources"* ]]; then
+          echo "::set-output name=deploy::true"
+          echo "::set-output name=diff::$res"
+        else
+          echo "Skipping deploy since there are no changes to the stack"
+        fi
+
+    - name: Show diff
+      shell: bash
+      if: ${{ steps.diff.outputs.deploy == 'true' }}
+      run: |
+        echo ${{ steps.diff.outputs.diff }}
+    
+    - name: Synthesize
+      shell: bash
+      if: ${{ steps.diff.outputs.deploy == 'true' }}
+      run:
+        cdk synth -c env=${{ inputs.environment }}
+
+    - name: Deploy
+      shell: bash
+      if: ${{ steps.diff.outputs.deploy == 'true' }}
+      run:
+        cdk deploy -c env=${{ inputs.environment }}

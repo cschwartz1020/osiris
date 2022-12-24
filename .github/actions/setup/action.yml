@@ -1,0 +1,43 @@
+name: 'Setup'
+description: 'configures AWS credentials and sets up environment for CDK'
+inputs:
+  region:  
+    description: 'Region to deploy to'
+    required: true
+  environment:
+    description: 'Environment to deploy to'
+    required: true
+  aws-access-key:
+    description: 'AWS access key'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS secret access key'
+    required: true
+
+runs:
+
+  using: "composite"
+  steps:
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.region }}
+
+    - name: Install CDK
+      shell: bash
+      run: |
+        npm install -g aws-cdk@2.56.0
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip install -r requirements.txt
+
+    - name: Export CDK environment variables
+      shell: bash
+      run: |
+        export CDK_DEFAULT_ACCOUNT=$(aws --region ${{ inputs.region }} sts get-caller-identity | jq -r '.Account')
+        export CDK_DEFAULT_REGION=${{ inputs.region }}

@@ -1,0 +1,38 @@
+# lol do not use this in production
+# this is so I can save on AWS costs
+
+
+name: Multi-Region Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'AWS region'
+        required: true
+        default: 'us-east-1'
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    
+    - name: setup-cdk
+      uses: ./.github/actions/deploy
+      with:
+        region: ${{ inputs.region }}
+        environment: ${{ inputs.environment }}
+        aws-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: destroy
+      run: cdk destroy --force -c env=${{ inputs.environment }}

@@ -1,0 +1,92 @@
+name: Multi-Region Deploy
+on:
+  push: 
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  deploy-production-us-east-1:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    
+    - name: deploy
+      uses: ./.github/actions/deploy
+      with:
+        region: us-east-1
+        environment: production
+        aws-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy-production-ap-southeast-2:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    
+    - name: deploy
+      uses: ./.github/actions/deploy
+      with:
+        region: ap-southeast-2
+        environment: production
+        aws-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy-staging-us-east-1:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    
+    - name: deploy
+      uses: ./.github/actions/deploy
+      with:
+        region: us-east-1
+        environment: staging
+        aws-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy-staging-ap-southeast-2:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    
+    - name: deploy
+      uses: ./.github/actions/deploy
+      with:
+        region: ap-southeast-2
+        environment: staging
+        aws-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  
+
+    # - name: Setup environment for CDK
+    #   uses: ./.github/actions/setup
+    #   with:
+    #     region: us-east-1
+    #     environment: production
+    #     aws-access-key: ${{ secrets.AWS_ACCESS_KEY }}
+    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    # - name: Show diff
+    #   id: diff
+    #   run: |
+    #     cdk diff -c env=${{ env.ENVIRONMENT }}
+    
+    # - name: Synthesize
+    #   if: ${{ steps.diff.outputs.deploy == 'true' }}
+    #   run:
+    #     cdk synth -c env=${{ env.ENVIRONMENT }}
+
+    # - name: Deploy
+    #   if: ${{ steps.diff.outputs.deploy == 'true' }}
+    #   run:
+    #     cdk deploy -c env=${{ env.ENVIRONMENT }}
