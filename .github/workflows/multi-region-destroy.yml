@@ -2,7 +2,7 @@
 # this is so I can save on AWS costs
 
 
-name: Multi-Region Deploy
+name: Multi-Region Destroy
 on:
   workflow_dispatch:
     inputs:

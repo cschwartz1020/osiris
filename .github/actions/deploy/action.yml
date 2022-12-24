@@ -26,12 +26,15 @@ runs:
         environment: ${{ inputs.environment }}
         aws-access-key: ${{ inputs.aws-access-key }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+      
+    # - name: Setup upterm session
+    #   uses: lhotari/action-upterm@v1
 
     - name: Check diff
       shell: bash
       id: diff
       run: |
-        res=$(cdk diff -c env=${{ inputs.environment }} 2>&1)
+        res=$(cdk diff -c env=${{ inputs.environment }} 2>&1 | tee /dev/stdout)
 
         if [[ "$res" == *"Resources"* ]]; then
           echo "::set-output name=deploy::true"
