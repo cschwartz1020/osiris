@@ -54,4 +54,4 @@ runs:
       shell: bash
       if: ${{ steps.diff.outputs.deploy == 'true' }}
       run:
-        cdk deploy -c env=${{ inputs.environment }}
+        cdk deploy -c env=${{ inputs.environment }} --require-approval never
