@@ -1,13 +1,14 @@
 from aws_cdk import (
     aws_eks as eks,
-    aws_ec2 as ec2
+    aws_ec2 as ec2,
+    aws_iam as iam
 )
 from constructs import Construct
 from ..networking.vpc import VPC
 
 
 class EKS(Construct):
-    def __init__(self, scope: Construct, id: str, *, vpc: VPC) -> None:
+    def __init__(self, scope: Construct, id: str, *, Vpc: VPC) -> None:
         super().__init__(scope, id)
 
         env_name = self.node.try_get_context("env")
@@ -16,8 +17,8 @@ class EKS(Construct):
         # m5.large is probably suitable for real production workloads
         self.cluster = eks.Cluster(self, env_name,
                                    cluster_name=env_name,
-                                   version=eks.KubernetesVersion.V1_24,
-                                   vpc=vpc.vpc,
+                                   version=eks.KubernetesVersion.V1_23,
+                                   vpc=Vpc.vpc,
                                    default_capacity=0,
                                    default_capacity_type=eks.DefaultCapacityType.NODEGROUP,
                                    default_capacity_instance=ec2.InstanceType.of(
@@ -36,3 +37,6 @@ class EKS(Construct):
                                             max_size=2,
                                             desired_size=2
                                             )
+        admin_user = iam.User.from_user_name(self, 'User', 'adminUser')
+        self.cluster.aws_auth.add_user_mapping(
+            admin_user, groups=["system:masters"])

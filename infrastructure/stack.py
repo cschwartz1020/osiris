@@ -13,5 +13,5 @@ class Infrastructure(cdk.Stack):
         **kwargs: Any,
     ):
         super().__init__(scope, stack_id_, **kwargs)
-        vpc = VPC(self, "Vpc")
-        EKS(self, "Eks", vpc=vpc)
+        Vpc = VPC(self, "Vpc")
+        EKS(self, "Eks", Vpc=Vpc)
