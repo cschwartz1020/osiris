@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import aws_cdk as cdk
-from components.networking.stack import Networking
+from infrastructure.stack import Infrastructure
 import constants
 
 
@@ -11,7 +11,7 @@ if not env_name:
     raise Exception(
         "Environment not passed into context... Add -c env=<environment> to your CDK command")
 
-Networking(
+Infrastructure(
     app,
     f'{constants.APP_NAME}-{env_name}',
     env=cdk.Environment(
@@ -19,5 +19,6 @@ Networking(
         region=os.environ["CDK_DEFAULT_REGION"],
     )
 )
+
 
 app.synth()
