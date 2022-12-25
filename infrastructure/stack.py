@@ -1,10 +1,11 @@
 from constructs import Construct
 import aws_cdk as cdk
-from .constructs.infrastructure import VPC
+from .constructs.networking.vpc import VPC
+from .constructs.compute.eks import EKS
 from typing import Any
 
 
-class Networking(cdk.Stack):
+class Infrastructure(cdk.Stack):
     def __init__(
         self,
         scope: Construct,
@@ -12,5 +13,5 @@ class Networking(cdk.Stack):
         **kwargs: Any,
     ):
         super().__init__(scope, stack_id_, **kwargs)
-
         vpc = VPC(self, "Vpc")
+        EKS(self, "Eks", vpc=vpc)

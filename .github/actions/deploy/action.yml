@@ -40,16 +40,9 @@ runs:
 
         if grep "Resources" /tmp/cdk-diff; then
           echo "::set-output name=deploy::true"
-          echo "::set-output name=diff::$res"
         else
           echo "Skipping deploy since there are no changes to the stack"
         fi
-
-    - name: Show diff
-      shell: bash
-      if: ${{ steps.diff.outputs.deploy == 'true' }}
-      run: |
-        echo ${{ steps.diff.outputs.diff }}
     
     - name: Synthesize
       shell: bash
