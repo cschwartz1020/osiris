@@ -30,11 +30,19 @@ runs:
     # - name: Setup upterm session
     #   uses: lhotari/action-upterm@v1
 
+    # IP will always be in us-east-1
+    - name: Get allow IP for bastion
+      shell: bash
+      id: ip
+      run: | 
+        ip=$(aws ssm get-parameter --region us-east-1 --with-decryption --name /bastion/allow-ip | jq -r '.Parameter.Value')
+        echo "::set-output name=ip::$ip"
+
     - name: Check diff
       shell: bash
       id: diff
       run: |
-        cdk diff -c env=${{ inputs.environment }} 2>&1 > /tmp/cdk-diff
+        cdk diff -c env=${{ inputs.environment }} -c ip=${{ steps.ip.outputs.ip }} 2>&1 > /tmp/cdk-diff
 
         cat /tmp/cdk-diff
 
@@ -48,10 +56,10 @@ runs:
       shell: bash
       if: ${{ steps.diff.outputs.deploy == 'true' }}
       run:
-        cdk synth -c env=${{ inputs.environment }}
+        cdk synth -c env=${{ inputs.environment }} -c ip=${{ steps.ip.outputs.ip }}
 
     - name: Deploy
       shell: bash
       if: ${{ steps.diff.outputs.deploy == 'true' }}
       run:
-        cdk deploy -c env=${{ inputs.environment }} --require-approval never
+        cdk deploy -c env=${{ inputs.environment }} -c ip=${{ steps.ip.outputs.ip }} --require-approval never

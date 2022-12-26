@@ -5,7 +5,13 @@ from ..networking.vpc import VPC
 
 class EKS(Construct):
     def __init__(
-        self, scope: Construct, id: str, *, Vpc: VPC, app_subnets: ec2.SubnetSelection
+        self,
+        scope: Construct,
+        id: str,
+        *,
+        Vpc: VPC,
+        app_subnets: ec2.SubnetSelection,
+        allow_security_group: ec2.SecurityGroup,
     ) -> None:
         super().__init__(scope, id)
 
@@ -33,12 +39,25 @@ class EKS(Construct):
             self, f"k8s-{env_name}-keypair", key_name=f"k8s-{env_name}"
         )
 
+        k8s_security_group = ec2.SecurityGroup(
+            self,
+            f"k8s-{env_name}-sg",
+            vpc=Vpc.vpc,
+            security_group_name=f"k8s-{env_name}-sg",
+        )
+
+        k8s_security_group.add_ingress_rule(
+            ec2.Peer.security_group_id(allow_security_group.security_group_id),
+            ec2.Port.tcp(22),
+        )
+
         launch_template = ec2.CfnLaunchTemplate(
             self,
             f"k8s-{env_name}-lt",
             launch_template_data=ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
                 instance_type="t2.micro",
                 key_name=key_pair.key_name,
+                security_group_ids=[k8s_security_group.security_group_id],
                 tag_specifications=[
                     ec2.CfnLaunchTemplate.TagSpecificationProperty(
                         resource_type="instance",
