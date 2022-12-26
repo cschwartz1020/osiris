@@ -13,5 +13,14 @@ class Infrastructure(cdk.Stack):
         **kwargs: Any,
     ):
         super().__init__(scope, stack_id_, **kwargs)
+
         Vpc = VPC(self, "Vpc")
-        EKS(self, "Eks", Vpc=Vpc)
+
+        app_subnets = self.get_app_subnets(Vpc)
+
+        EKS(self, "Eks", Vpc=Vpc, app_subnets=app_subnets)
+
+    def get_app_subnets(self, Vpc: VPC):
+        return cdk.aws_ec2.SubnetSelection(
+            subnet_type=cdk.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+        )

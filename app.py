@@ -9,15 +9,16 @@ app = cdk.App()
 env_name = app.node.try_get_context("env")
 if not env_name:
     raise Exception(
-        "Environment not passed into context... Add -c env=<environment> to your CDK command")
+        "Environment not passed into context... Add -c env=<environment> to your CDK command"
+    )
 
 Infrastructure(
     app,
-    f'{constants.APP_NAME}-{env_name}',
+    f"{constants.APP_NAME}-{env_name}",
     env=cdk.Environment(
         account=os.environ["CDK_DEFAULT_ACCOUNT"],
         region=os.environ["CDK_DEFAULT_REGION"],
-    )
+    ),
 )
 
 
