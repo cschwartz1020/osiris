@@ -30,6 +30,7 @@ class Infrastructure(cdk.Stack):
             "Eks",
             Vpc=Vpc,
             app_subnets=app_subnets,
+            dmz_subnets=dmz_subnets,
             allow_security_group=bastion_security_group,
         )
 

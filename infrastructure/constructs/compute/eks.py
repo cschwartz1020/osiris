@@ -11,6 +11,7 @@ class EKS(Construct):
         *,
         Vpc: VPC,
         app_subnets: ec2.SubnetSelection,
+        dmz_subnets: ec2.SubnetSelection,
         allow_security_group: ec2.SecurityGroup,
     ) -> None:
         super().__init__(scope, id)
@@ -25,6 +26,7 @@ class EKS(Construct):
             cluster_name=env_name,
             version=eks.KubernetesVersion.V1_23,
             vpc=Vpc.vpc,
+            vpc_subnets=[dmz_subnets],
             default_capacity=0,
             default_capacity_type=eks.DefaultCapacityType.NODEGROUP,
             default_capacity_instance=ec2.InstanceType.of(
@@ -39,14 +41,14 @@ class EKS(Construct):
             self, f"k8s-{env_name}-keypair", key_name=f"k8s-{env_name}"
         )
 
-        k8s_security_group = ec2.SecurityGroup(
+        k8s_worker_node_security_group = ec2.SecurityGroup(
             self,
-            f"k8s-{env_name}-sg",
+            f"k8s-worker-node-{env_name}-sg",
             vpc=Vpc.vpc,
-            security_group_name=f"k8s-{env_name}-sg",
+            security_group_name=f"k8s-worker-node-{env_name}-sg",
         )
 
-        k8s_security_group.add_ingress_rule(
+        k8s_worker_node_security_group.add_ingress_rule(
             ec2.Peer.security_group_id(allow_security_group.security_group_id),
             ec2.Port.tcp(22),
         )
@@ -57,7 +59,10 @@ class EKS(Construct):
             launch_template_data=ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
                 instance_type="t2.micro",
                 key_name=key_pair.key_name,
-                security_group_ids=[k8s_security_group.security_group_id],
+                security_group_ids=[
+                    k8s_worker_node_security_group.security_group_id,
+                    self.cluster.cluster_security_group_id,
+                ],
                 tag_specifications=[
                     ec2.CfnLaunchTemplate.TagSpecificationProperty(
                         resource_type="instance",

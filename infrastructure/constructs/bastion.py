@@ -37,6 +37,13 @@ class Bastion(Construct):
                 instance_market_options=ec2.CfnLaunchTemplate.InstanceMarketOptionsProperty(
                     market_type="spot"
                 ),
+                # network_interfaces=[
+                #     ec2.CfnLaunchTemplate.NetworkInterfaceProperty(
+                #         associate_public_ip_address=True,
+                #         device_index=0,
+                #         groups=[self.bastion_security_group.security_group_id],
+                #     )
+                # ],
                 image_id=ec2.MachineImage.latest_amazon_linux()
                 .get_image(self)
                 .image_id,
@@ -57,14 +64,14 @@ class Bastion(Construct):
             )
         )
 
-        autoscaling.CfnAutoScalingGroup(
-            self,
-            f"bastion-{env_name}-asg",
-            auto_scaling_group_name="bastion-{env_name}-asg",
-            launch_template=bastion_launch_template_asg_specification_property,
-            vpc_zone_identifier=dmz_subnets.subnets,
-            desired_capacity="1",
-            max_size="1",
-            min_size="1",
-            availability_zones=dmz_subnets.availability_zones,
-        )
+        # autoscaling.CfnAutoScalingGroup(
+        #     self,
+        #     f"bastion-{env_name}-asg",
+        #     auto_scaling_group_name="bastion-{env_name}-asg",
+        #     launch_template=bastion_launch_template_asg_specification_property,
+        #     vpc_zone_identifier=dmz_subnets.subnets,
+        #     desired_capacity="1",
+        #     max_size="1",
+        #     min_size="1",
+        #     availability_zones=Vpc.vpc.availability_zones,
+        # )
